@@ -1,7 +1,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
-# 
+#
 # Copyright (c) 2013, Paul Fultz II
 
 import sublime, sublime_plugin
@@ -38,7 +38,7 @@ def debug_print(*args):
 
 #
 #
-# Retrieve options from cmake 
+# Retrieve options from cmake
 #
 #
 def parse_flags(f):
@@ -91,7 +91,7 @@ def filter_flag(f):
 
 ordered_std_flags = ['-std=c++0x', '-std=gnu++0x', '-std=c++11', '-std=gnu++11', '-std=c++1y', '-std=gnu++1y', '-std=c++14', '-std=gnu++14', '-std=c++1z', '-std=gnu++1z', '-std=c++17', '-std=gnu++17']
 def find_index(l, elem):
-    for i,x in enumerate(l): 
+    for i,x in enumerate(l):
         if x == elem: return i
     return -1
 
@@ -119,7 +119,7 @@ def accumulate_options(path):
             if f.endswith('compile_commands.json'):
                flags.extend(merge_flags(parse_compile_commands(root, f), flags))
                return split_flags(flags);
-            if f.endswith('flags.make'): 
+            if f.endswith('flags.make'):
                 flags.extend(merge_flags(parse_flags(os.path.join(root, f)), flags))
     return split_flags(flags)
 
@@ -132,7 +132,7 @@ def clear_options():
 def get_build_dir(view):
     result = get_setting(view, "build_dir", ["build"])
     if isinstance(result, str): return [result]
-    else: return result 
+    else: return result
 
 def get_options(project_path, additional_options, build_dirs, default_options):
     if project_path in project_options: return project_options[project_path]
@@ -210,7 +210,7 @@ def find_includes(view, project_path):
         if option.startswith('-I'): result.update(search_include(option[2:]))
         if is_path: result.update(search_include(option))
         if option == '-isystem': is_path = True
-        else: is_path = False 
+        else: is_path = False
     for path in get_setting(view, "default_include_paths", ["/usr/include", "/usr/local/include"]):
         result.update(search_include(path))
     return sorted(result)
@@ -313,7 +313,7 @@ clang_error_panel = ClangErrorPanel()
 
 #
 #
-# Get language from sublime 
+# Get language from sublime
 #
 #
 
@@ -449,6 +449,7 @@ def is_build_panel_visible(window):
 
 class ClangCompleteAutoComplete(sublime_plugin.EventListener):
     def complete_at(self, view, prefix, location, timeout):
+        # print("CROOT - clangcomplete.py - complete_at()")
         debug_print("complete_at", prefix)
         filename = view.file_name()
         # The view hasnt finsished loading yet
@@ -481,7 +482,7 @@ class ClangCompleteAutoComplete(sublime_plugin.EventListener):
 
 
     def diagnostics(self, view):
-        filename = view.file_name()  
+        filename = view.file_name()
         # The view hasnt finsished loading yet
         if (filename is None): return []
         diagnostics = get_diagnostics(filename, get_args(view))
@@ -515,19 +516,22 @@ class ClangCompleteAutoComplete(sublime_plugin.EventListener):
 
     def on_post_text_command(self, view, name, args):
         if not is_supported_language(view): return
-        
+
         if 'delete' in name: return
-        
+
+        # print('CROOT - clangcomplete.py - on_post_text_command()');
+
         pos = view.sel()[0].begin()
         self.complete_at(view, "", pos, 0)
-        
+
 
     def on_query_completions(self, view, prefix, locations):
         if not is_supported_language(view):
             return []
-            
+
         completions = self.complete_at(view, prefix, locations[0], get_setting(view, "timeout", 200))
         debug_print("on_query_completions:", prefix, len(completions))
+        # print("CROOT - clangcomplete.py - on_query_completions()")
         if (get_setting(view, "inhibit_sublime_completions", True)):
             return (completions, sublime.INHIBIT_WORD_COMPLETIONS | sublime.INHIBIT_EXPLICIT_COMPLETIONS)
         else:
@@ -536,7 +540,7 @@ class ClangCompleteAutoComplete(sublime_plugin.EventListener):
     def on_activated_async(self, view):
         debug_print("on_activated_async")
         if not is_supported_language(view): return
-        
+
         debug_print("on_activated_async: get_includes")
         get_includes(view)
         debug_print("on_activated_async: complete_at")
@@ -551,9 +555,9 @@ class ClangCompleteAutoComplete(sublime_plugin.EventListener):
         if show_diagnostics_on_save == 'always': show_panel = True
         elif show_diagnostics_on_save == 'never': show_panel = False
         else: show_panel = not is_build_panel_visible(view.window())
-        
+
         if show_panel: self.show_diagnostics(view)
-        
+
         pos = view.sel()[0].begin()
         self.complete_at(view, "", pos, 0)
 

@@ -17,6 +17,10 @@ ifeq ($(UNAME_S),Linux)
 endif
 ifeq ($(UNAME_S),Darwin)
     COMPLETE_LDFLAGS = -dynamiclib -Wl,-install_name,$(LIB_NAME).dylib -o $(LIB_NAME).dylib $(SRC).o $(LIBS)
+    # CROOT - needed to add the -lstdc++.6 to appropriately link against that lib. Not sure why
+    # found the solution here:
+    # http://mathematica.stackexchange.com/questions/34692/mathlink-linking-error-after-os-x-10-9-mavericks-upgrade
+    # LDFLAGS = -lstdc++.6 -dynamiclib -Wl,-install_name,$(LIB_NAME).dylib -o $(LIB_NAME).dylib $(SRC).o $(LIBS)
 endif
 
 all:
